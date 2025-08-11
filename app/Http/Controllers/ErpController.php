@@ -355,9 +355,7 @@ class ErpController extends Controller
         $request->validate([
             'username' => 'required',
             'password' => 'required',
-            'fcm_token' => 'required'
-        ], [
-            'fcm_token.required' => 'Please allow notification to login'
+//            'fcm_token' => 'required'
         ]);
 //        $this->erp->getProfile();
         $data = $this->erp->secondLayerLogin($request);
