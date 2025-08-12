@@ -10,12 +10,14 @@ use Exception;
 class ApiServices
 {
 //    protected string $baseUrl = 'http://erp.paysenzhost.xyz/apiv2';
-    protected string $baseUrl = 'https://erp.gen-itech.com/apiv2';
+    protected string $baseUrl;
 
     protected string $username = 'webuser';
     protected string $password = 'PayPass2025';
-    protected string $text_token = 'test-token';
 
+    public function __construct(){
+        $this->baseUrl = config('services.erp.api_url');
+    }
     public function login()
     {
         $response = Http::withHeaders([
@@ -806,7 +808,7 @@ class ApiServices
         $products = $this->productSearching(null);
 //        dd($products);
         $rawProducts = $products['response']['product_list'];
-        $related_products = collect($rawProducts)->random(4);
+        $related_products = collect($rawProducts)->shuffle()->take(4);
         Log::info('Related Products:\n'.print_r($related_products, true));
         return $related_products;
 
@@ -929,15 +931,15 @@ class ApiServices
 
     public function getWarehouses(){
         Log::info('Getting Warehouses....');
-            $token = $this->getAccessToken();
-            $secondLayerToken = $this->getSecondLayerToken();
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $token,
-                'X-Second-Token' => $secondLayerToken,
-                'Content-Type' => 'application/json',
-            ])->get($this->baseUrl . '/warehouse_list');
-            $data = $response->json();
-            return $data;
+        $token = $this->getAccessToken();
+        $secondLayerToken = $this->getSecondLayerToken();
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'X-Second-Token' => $secondLayerToken,
+            'Content-Type' => 'application/json',
+        ])->get($this->baseUrl . '/warehouse_list');
+        $data = $response->json();
+        return $data;
     }
 
     public function contactStore($request){
@@ -948,7 +950,7 @@ class ApiServices
             'phone' => $request->phone,
             'subject' => $request->subject,
             'message' => $request->message,
-            ];
+        ];
         $response = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
         ])->post($this->baseUrl . '/insert_contact', $form_input);

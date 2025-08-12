@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'erp' => [
+        'api_url' => env('API_URL'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
