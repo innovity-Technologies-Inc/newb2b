@@ -128,12 +128,16 @@
                                         <div class="login_footer form-group mb-3 col-xl-12 col-md-12">
                                             <div class="chek-form">
                                                 <div class="custome-checkbox">
-                                                    <input class="form-check-input" type="checkbox" name="checkbox"
+                                                    <input class="form-check-input" type="checkbox" name="terms"
                                                            id="exampleCheckbox2" value="">
                                                     <label class="form-check-label" for="exampleCheckbox2"><span>I agree to terms &amp; Policy.</span></label>
                                                 </div>
+                                                @error('terms')
+                                                <small class="text-danger">{{$message}}</small>
+                                                @enderror
                                             </div>
                                         </div>
+
                                         <div class="form-group mb-3 col-xl-12 col-md-12">
                                             <button type="submit" class="btn btn-fill-out btn-block" name="register">
                                                 Register
