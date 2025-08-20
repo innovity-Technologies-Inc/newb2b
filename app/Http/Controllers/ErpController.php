@@ -11,44 +11,49 @@ use Illuminate\Support\Str;
 class ErpController extends Controller
 {
     protected $erp;
-    public function __construct(ApiServices $erp){
+
+    public function __construct(ApiServices $erp)
+    {
         $this->erp = $erp;
     }
 
-    public function showCategories(){
+    public function showCategories()
+    {
         $categories = $this->erp->getFormattedCategoryTree();
-        return response()-> json($categories);
+        return response()->json($categories);
     }
 
 
-    public function homepage(){
+    public function homepage()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
         return view('frontend.homepage', compact('categoryTree', 'warehouse_lists'));
 
     }
 
-    public function getFormData(Request $request){
+    public function getFormData(Request $request)
+    {
         $id = $request->id;
-        Log::info('Category ID:'.$id);
+        Log::info('Category ID:' . $id);
 
         $product_id = $request->product_id;
-        Log::info('Product ID:'.$product_id);
+        Log::info('Product ID:' . $product_id);
 
         $page = $request->page;
-        Log::info('Page No:'.$page);
+        Log::info('Page No:' . $page);
 
         $limit = 9;
-        Log::info('Page Limit:'.$limit);
+        Log::info('Page Limit:' . $limit);
 
         $min_price = $request->min_price;
-        Log::info('min_price:'.$min_price);
+        Log::info('min_price:' . $min_price);
 
         $max_price = $request->max_price;
-        Log::info('max_price:'.$max_price);
+        Log::info('max_price:' . $max_price);
 
         $search_keyword = $request->search_keyword;
-        Log::info('search_keyword:'.$search_keyword);
+        Log::info('search_keyword:' . $search_keyword);
 
         return (object)[
             'id' => $id,
@@ -61,7 +66,8 @@ class ErpController extends Controller
         ];
     }
 
-    public function showProductsByCategory(Request $request){
+    public function showProductsByCategory(Request $request)
+    {
         $tokenExpire = session()->get('second_layer_token_expire_at');
         if (session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire)) {
             $this->erp->getCartItems();
@@ -69,30 +75,31 @@ class ErpController extends Controller
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
-        Log::info('Category Tree:\n'.print_r($categoryTree, true));
+        Log::info('Category Tree:\n' . print_r($categoryTree, true));
 
         $formData = $this->getFormData($request);
 
         $filter = [
             'sort' => $request->sort,
         ];
-        Log::info('filter input:'.print_r($filter, true));
-        $product_data = $this->erp->getProductsByCategory($formData,$filter);
+        Log::info('filter input:' . print_r($filter, true));
+        $product_data = $this->erp->getProductsByCategory($formData, $filter);
 //        dd($product_data);
-        Log::info('Final Product Data:'.print_r($product_data, true));
+        Log::info('Final Product Data:' . print_r($product_data, true));
         if (isset($product_data['final_products'][0]['price'])) {
             $is_price = true;
-        }else{
+        } else {
             $is_price = false;
         }
         $title = $product_data['level_3_category'][0]['category_name'] ?? null;
         $pages = $product_data['page_count'];
-        Log::info('Pages:'.$pages);
+        Log::info('Pages:' . $pages);
         return view('frontend.productsByCategory',
-            compact('product_data',  'categoryTree', 'title', 'formData', 'pages', 'is_price', 'warehouse_lists' ));
+            compact('product_data', 'categoryTree', 'title', 'formData', 'pages', 'is_price', 'warehouse_lists'));
     }
 
-    public function showProducts(Request $request){
+    public function showProducts(Request $request)
+    {
         $tokenExpire = session()->get('second_layer_token_expire_at');
         if (session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire)) {
             $this->erp->getCartItems();
@@ -100,32 +107,33 @@ class ErpController extends Controller
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
-        Log::info('Category Tree:\n'.print_r($categoryTree, true));
+        Log::info('Category Tree:\n' . print_r($categoryTree, true));
 
         $formData = $this->getFormData($request);
 
         $filter = [
             'sort' => $request->sort,
         ];
-        Log::info('filter input:'.print_r($filter, true));
-        $product_data = $this->erp->getProductsByCategory($formData,$filter);
+        Log::info('filter input:' . print_r($filter, true));
+        $product_data = $this->erp->getProductsByCategory($formData, $filter);
 
 //        dd($product_data);
-        Log::info('Final Product Data:'.print_r($product_data, true));
+        Log::info('Final Product Data:' . print_r($product_data, true));
         if (isset($product_data['final_products'][0]['price'])) {
             $is_price = true;
-        }else{
+        } else {
             $is_price = false;
         }
         $title = 'Products';
         $pages = $product_data['page_count'];
-        Log::info('Pages:'.$pages);
+        Log::info('Pages:' . $pages);
         return view('frontend.productsByCategory',
-            compact('product_data',  'categoryTree', 'title', 'formData', 'pages', 'is_price', 'warehouse_lists' ));
+            compact('product_data', 'categoryTree', 'title', 'formData', 'pages', 'is_price', 'warehouse_lists'));
     }
 
 
-    public function showProductDetails(Request $request){
+    public function showProductDetails(Request $request)
+    {
         $tokenExpire = session()->get('second_layer_token_expire_at');
         if (session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire)) {
             $this->erp->getCartItems();
@@ -143,7 +151,8 @@ class ErpController extends Controller
             compact('categoryTree', 'product', 'title', 'subtitle', 'related_products', 'warehouse_lists'));
     }
 
-    public function add_to_cart(Request $request){
+    public function add_to_cart(Request $request)
+    {
 
         $data = $this->erp->addToCart($request);
 
@@ -152,20 +161,18 @@ class ErpController extends Controller
                 'message' => $data['error_msg'],
                 'alert-type' => 'error'
             ]);
-        }
-        else{
-            if ($data['status'] == 'token-error'){
+        } else {
+            if ($data['status'] == 'token-error') {
                 return redirect()->route('login')->with([
                     'message' => 'Login Expired',
                     'alert-type' => 'error'
                 ]);
-            }elseif ($data['status'] == 'error'){
+            } elseif ($data['status'] == 'error') {
                 return redirect()->back()->with([
                     'message' => 'Failed to insert cart',
                     'alert-type' => 'error'
                 ]);
-            }
-            else{
+            } else {
                 return redirect()->back()->with([
                     'message' => 'Added to Cart',
                     'alert-type' => 'success'
@@ -174,7 +181,8 @@ class ErpController extends Controller
         }
     }
 
-    public function showCart(){
+    public function showCart()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
         $data = $this->erp->getCartItems();
@@ -184,12 +192,12 @@ class ErpController extends Controller
                 'message' => 'Login Expired',
                 'alert-type' => 'error'
             ]);
-        }elseif ($data['status'] == 'token-error'){
+        } elseif ($data['status'] == 'token-error') {
             return redirect()->route('login')->with([
                 'message' => 'Login Expired',
                 'alert-type' => 'error'
             ]);
-        }else{
+        } else {
             $cart_items = collect($data['cart_items']);
 //            dd($cart_items);
             $title = 'Cart';
@@ -198,7 +206,8 @@ class ErpController extends Controller
 
     }
 
-    public function update_cart(Request $request){
+    public function update_cart(Request $request)
+    {
         Log::info('Updating Cart Items....');
 //        dd($request->all());
         $data = $this->erp->updateCartItems($request);
@@ -208,19 +217,18 @@ class ErpController extends Controller
                 'message' => $data['error_msg'],
                 'alert-type' => 'error'
             ]);
-        }else{
-            if ($data['status'] == 'token-error'){
+        } else {
+            if ($data['status'] == 'token-error') {
                 return redirect()->route('login')->with([
                     'message' => 'Login Expired',
                     'alert-type' => 'error'
                 ]);
-            }elseif ($data['status'] == 'error'){
+            } elseif ($data['status'] == 'error') {
                 return redirect()->back()->with([
                     'message' => 'Failed to update cart',
                     'alert-type' => 'error'
                 ]);
-            }
-            else{
+            } else {
                 return redirect()->back()->with([
                     'message' => 'Cart Updated Successfully',
                     'alert-type' => 'success'
@@ -230,7 +238,8 @@ class ErpController extends Controller
 
     }
 
-    public function delete_cart(Request $request){
+    public function delete_cart(Request $request)
+    {
         Log::info('Deleting Cart Items....');
         $data = $this->erp->removeFromCart($request);
         //        dd($data);
@@ -239,19 +248,18 @@ class ErpController extends Controller
                 'message' => $data['error_msg'],
                 'alert-type' => 'error'
             ]);
-        }else{
-            if ($data['status'] == 'token-error'){
+        } else {
+            if ($data['status'] == 'token-error') {
                 return redirect()->route('login')->with([
                     'message' => 'Login Expired',
                     'alert-type' => 'error'
                 ]);
-            }elseif ($data['status'] == 'error'){
+            } elseif ($data['status'] == 'error') {
                 return redirect()->back()->with([
                     'message' => 'Failed to Remove cart Item',
                     'alert-type' => 'error'
                 ]);
-            }
-            else{
+            } else {
                 return redirect()->back()->with([
                     'message' => 'Removed from Cart Successfully',
                     'alert-type' => 'success'
@@ -260,7 +268,8 @@ class ErpController extends Controller
         }
     }
 
-    public function checkout_form(Request $request){
+    public function checkout_form(Request $request)
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
@@ -277,12 +286,12 @@ class ErpController extends Controller
                 'message' => 'Login Expired',
                 'alert-type' => 'error'
             ]);
-        }elseif ($data['status'] == 'token-error'){
+        } elseif ($data['status'] == 'token-error') {
             return redirect()->route('login')->with([
                 'message' => 'Login Expired',
                 'alert-type' => 'error'
             ]);
-        }else{
+        } else {
             $cart_items = collect($data['cart_items']);
 //            dd($cart_items);
             $payment_methods = $this->erp->getPaymentMethods();
@@ -295,15 +304,16 @@ class ErpController extends Controller
 
     }
 
-    public function place_order(Request $request){
+    public function place_order(Request $request)
+    {
 //        dd($request->all());
         $data = $this->erp->checkout($request);
-        if ($data['status'] == 'error'){
+        if ($data['status'] == 'error') {
             return redirect()->route('login')->with([
                 'message' => 'Login Expired',
                 'alert-type' => 'error'
             ]);
-        }else{
+        } else {
             return redirect()->route('order_complete')->with([
                 'message' => 'Order Placed Successfully',
                 'alert-type' => 'success'
@@ -311,7 +321,8 @@ class ErpController extends Controller
         }
     }
 
-    public function order_complete(){
+    public function order_complete()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
         $this->erp->getCartItems();
@@ -320,7 +331,8 @@ class ErpController extends Controller
         return view('frontend.order_complete', compact('title', 'categoryTree', 'warehouse_lists'));
     }
 
-    public function vision_mission_values(){
+    public function vision_mission_values()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
@@ -328,7 +340,8 @@ class ErpController extends Controller
         return view('frontend.vision_mission_values', compact('title', 'categoryTree', 'warehouse_lists'));
     }
 
-    public function about_us(){
+    public function about_us()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
@@ -336,7 +349,8 @@ class ErpController extends Controller
         return view('frontend.about_us', compact('title', 'categoryTree', 'warehouse_lists'));
     }
 
-    public function contact(){
+    public function contact()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
@@ -345,13 +359,15 @@ class ErpController extends Controller
     }
 
 
-    public function login_form(){
+    public function login_form()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $title = 'Login';
         return view('frontend.authentication.login', compact('title', 'categoryTree'));
     }
 
-    public function login_store(Request $request){
+    public function login_store(Request $request)
+    {
         $request->validate([
             'username' => 'required',
             'password' => 'required',
@@ -361,10 +377,10 @@ class ErpController extends Controller
         $data = $this->erp->secondLayerLogin($request);
 //        $email = $request->username;
 //        $this->erp->getCommission($email);
-        if ($data['status']== 'success') {
-            $second_layer_token=$data['data']['second_layer_token'];
+        if ($data['status'] == 'success') {
+            $second_layer_token = $data['data']['second_layer_token'];
             // dd($second_layer_token);
-            session()->put('second_layer_token', $second_layer_token );
+            session()->put('second_layer_token', $second_layer_token);
             session()->put('second_layer_token_expire_at', now()->addMinutes(50));
 
             $this->erp->getProfile();
@@ -372,28 +388,31 @@ class ErpController extends Controller
                 'message' => 'Login Successful',
                 'alert-type' => 'success'
             ]);
-        }elseif($data['status']== 'error'){
+        } elseif ($data['status'] == 'error') {
             return redirect()->route('login')->with([
-                'message' => $data['message'].'Login Failed. Please try again',
+                'message' => $data['message'] . 'Login Failed. Please try again',
                 'alert-type' => 'error'
             ]);
-        }else{
+        } else {
             return redirect()->route('login')->with([
-                'message' => $data['message'].'Login Failed. Please try again',
+                'message' => $data['message'] . 'Login Failed. Please try again',
                 'alert-type' => 'error'
             ]);
         }
     }
 
-    public function registration_form(){
+    public function registration_form()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $title = 'Registration';
         return view('frontend.authentication.registration', compact('title', 'categoryTree'));
     }
-    public function registration_store(Request $request){
+
+    public function registration_store(Request $request)
+    {
         $request->validate([
-            'customer_name' => 'required',
-            'mobile' => 'required|digits_between:3,17',
+            'customer_name' => 'required|min:3|regex:/^[A-Za-z\s]+$/',
+            'mobile' => 'required|regex:/^1[2-9][0-9]{9}$/',
             'email' => 'required|email',
             'password' => [
                 'required',
@@ -401,15 +420,20 @@ class ErpController extends Controller
                 'min:8',
                 'confirmed',
                 'regex:/[!@#$%^&*(),.?":{}|<>]/',  // At least one special character
-            ]
+            ],
+            'terms' => 'accepted'
         ],
             [
                 'customer_name.required' => 'Please enter your name',
+                'customer_name.min' => 'Your name must be at least 3 characters long',
+                'customer_name.regex' => 'Your Name can only contain letters',
                 'password.regex' => 'Please enter at least one special character',
                 'mobile.required' => 'Please enter your mobile number',
+                'mobile.regex' => 'Please enter a valid USA mobile number with country code and area code without this (+) symbol',
                 'email.required' => 'Please enter your email address',
                 'password.min' => 'Please enter at least 8 characters',
                 'mobile.digits_between' => 'Please enter only digits between 3 and 17 characters',
+                'terms.accepted' => 'please accept terms and conditions',
             ], [
                 'customer_name' => 'Full Name',
                 'mobile' => 'Mobile No',
@@ -417,21 +441,22 @@ class ErpController extends Controller
                 'password' => 'Password',
             ]);
         $data = $this->erp->customer_insert($request);
-        if(isset($data['status']) && $data['status'] === 'error'){
+        if (isset($data['status']) && $data['status'] === 'error') {
             return redirect()->back()->with([
                 'error_message' => $data['message'],
                 'message' => 'Registration Failed. Please try again',
                 'alert-type' => 'error'
             ]);
-        }
-        else{
+        } else {
             return redirect()->route('registration.complete')->with([
                 'message' => 'Registration Successful',
                 'alert-type' => 'success'
             ]);
         }
     }
-    public function dashboard(){
+
+    public function dashboard()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
@@ -440,7 +465,9 @@ class ErpController extends Controller
         $title = 'User Dashboard';
         return view('frontend.user_dashboard', compact('title', 'categoryTree', 'warehouse_lists'));
     }
-    public function logout(){
+
+    public function logout()
+    {
         session()->forget('second_layer_token');
         session()->forget('customer_name');
         session()->forget('commission');
@@ -453,7 +480,8 @@ class ErpController extends Controller
         ]);
     }
 
-    public function customer_profile(){
+    public function customer_profile()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
@@ -470,7 +498,8 @@ class ErpController extends Controller
         return view('frontend.manage_profile', compact('categoryTree', 'title', 'profile', 'subtitle', 'warehouse_lists'));
     }
 
-    public function profile_update(Request $request){
+    public function profile_update(Request $request)
+    {
         $data = $this->erp->updateProfile($request);
         return redirect()->back()->with([
             'message' => 'Profile Updated Successfully',
@@ -478,21 +507,23 @@ class ErpController extends Controller
         ]);
     }
 
-    public function change_password(){
+    public function change_password()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
         $title = 'Change Password';
         return view('frontend.change_password', compact('title', 'categoryTree', 'warehouse_lists'));
     }
 
-    public function password_update(Request $request){
+    public function password_update(Request $request)
+    {
         $data = $this->erp->changePassword($request);
-        if($data['status'] === 'success'){
+        if ($data['status'] === 'success') {
             return redirect()->route('user.change_password')->with([
                 'message' => $data['message'],
                 'alert-type' => 'success'
             ]);
-        }else{
+        } else {
             return redirect()->route('user.change_password')->with([
                 'message' => $data['message'],
                 'alert-type' => 'error'
@@ -500,21 +531,23 @@ class ErpController extends Controller
         }
     }
 
-    public function registration_complete(){
+    public function registration_complete()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
         $title = 'Registration';
         return view('frontend.authentication.registration_complete', compact('title', 'categoryTree', 'warehouse_lists'));
     }
 
-    public function customer_delete(){
+    public function customer_delete()
+    {
         $data = $this->erp->deleteProfile();
-        if(isset($data['error_msg'])){
+        if (isset($data['error_msg'])) {
             return redirect()->back()->with([
                 'message' => $data['error_msg'],
                 'alert-type' => 'error'
             ]);
-        }else{
+        } else {
             $this->erp->secondLayerLogout();
             session()->forget('second_layer_token');
             return redirect()->route('homepage')->with([
@@ -525,7 +558,8 @@ class ErpController extends Controller
 
     }
 
-    public function warehouse_store(Request $request){
+    public function warehouse_store(Request $request)
+    {
         $warehouse_data = $request->warehouse;
         if (isset($warehouse_data)) {
 //            dd('data_set');
@@ -538,7 +572,7 @@ class ErpController extends Controller
                 'message' => 'Warehouse Saved Successfully',
                 'alert-type' => 'success'
             ]);
-        }else{
+        } else {
 //            dd('nothing');
             if (Cache::has('warehouse')) {
                 Cache::forget('warehouse');
@@ -552,20 +586,22 @@ class ErpController extends Controller
         }
     }
 
-    public function warehouse_list(){
+    public function warehouse_list()
+    {
         $data = $this->erp->getWarehouses();
 
         if ($data['status'] == 'success') {
             $warehouses = $data['warehouses'];
 //                dd($warehouses);
             return $warehouses;
-        }else{
-            $warehouses=[];
+        } else {
+            $warehouses = [];
             return $warehouses;
         }
     }
 
-    public function contact_message_store(Request $request){
+    public function contact_message_store(Request $request)
+    {
 
         $request->validate([
             'name' => 'required',
@@ -576,19 +612,21 @@ class ErpController extends Controller
         ]);
         $data = $this->erp->contactStore($request);
 //        dd($data);
-        if($data['status'] === 'success'){
+        if ($data['status'] === 'success') {
             return redirect()->back()->with([
                 'message' => $data['data']['response']['message'],
                 'alert-type' => 'success'
             ]);
-        }elseif($data['status'] === 'error'){
+        } elseif ($data['status'] === 'error') {
             return redirect()->back()->with([
                 'message' => $data['data']['message'],
                 'alert-type' => 'error'
             ]);
         }
     }
-    public function purchase_history(){
+
+    public function purchase_history()
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
 
@@ -597,45 +635,47 @@ class ErpController extends Controller
 
         $data = $this->erp->getInvoiceList();
 //        dd($data);
-        if($data['status'] === 'success'){
-            if($data['data']['status'] === 'success'){
+        if ($data['status'] === 'success') {
+            if ($data['data']['status'] === 'success') {
                 $invoice_lists = $data['data']['data'];
 //                dd($invoice_lists);
                 return view('frontend.purchase_history', compact('title', 'categoryTree', 'warehouse_lists', 'invoice_lists'));
-            }else{
+            } else {
                 return redirect()->back()->with([
                     'message' => 'Failed to fetched Purchase History. Try Again',
                     'alert-type' => 'error'
                 ]);
             }
 
-        }elseif($data['status'] === 'error'){
+        } elseif ($data['status'] === 'error') {
             return redirect()->back()->with([
                 'message' => 'Failed to fetched Purchase History. Try Again',
                 'alert-type' => 'error'
             ]);
         }
     }
-    public function invoice_details($invoice_id){
+
+    public function invoice_details($invoice_id)
+    {
         $categoryTree = $this->erp->getFormattedCategoryTree();
         $warehouse_lists = $this->warehouse_list();
         $this->erp->getCartItems();
         $title = 'Purchase History';
-        $subtitle = 'Invoice #'.$invoice_id;
+        $subtitle = 'Invoice #' . $invoice_id;
         $data = $this->erp->getInvoiceDetails($invoice_id);
-        if($data['status'] === 'success'){
-            if($data['data']['status'] === 'success'){
+        if ($data['status'] === 'success') {
+            if ($data['data']['status'] === 'success') {
                 $invoice_details = $data['data']['details'];
 //                dd($invoice_details);
                 return view('frontend.invoice_details', compact('title', 'subtitle', 'categoryTree', 'warehouse_lists', 'invoice_details'));
-            }else{
+            } else {
                 return redirect()->back()->with([
                     'message' => 'Failed to fetched Invoice Details. Try Again',
                     'alert-type' => 'error'
                 ]);
             }
 
-        }elseif($data['status'] === 'error'){
+        } elseif ($data['status'] === 'error') {
             return redirect()->back()->with([
                 'message' => 'Failed to fetched Invoice Details. Try Again',
                 'alert-type' => 'error'
