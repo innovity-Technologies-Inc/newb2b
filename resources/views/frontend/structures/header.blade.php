@@ -6,7 +6,7 @@
     $cart_count = session()->get('cart_items_count');
 @endphp
 
-<!-- START HEADER -->
+    <!-- START HEADER -->
 <header class="header_wrap">
 
     <div class="middle-header dark_skin">
@@ -43,7 +43,7 @@
                     @if(session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire))
                         <li style="color: #1bad4b; font-weight: bold">
                             <i class="linearicons-map-marker"></i>
-                        <span>
+                            <span>
                                 {{$warehouse_location ?? 'Not Selected'}}
                         </span>
                         </li>
@@ -63,7 +63,7 @@
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{route('user.dashboard')}}">Dashboard</a></li>
                                 <li><a class="dropdown-item" href="{{route('purchase_history')}}">Purchase History</a></li>
-{{--                                <li><a class="dropdown-item" href="#">Track Order</a></li>--}}
+                                {{--                                <li><a class="dropdown-item" href="#">Track Order</a></li>--}}
                                 <li>
                                     <form id="log-out" action="{{route('user.logout')}}" method="post">
                                         @csrf
@@ -82,7 +82,7 @@
 
 
                     @if(session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire))
-                    <li class="">
+                        <li class="">
                             <a class="nav-link nav-icon" href="{{ route('cart') }}">
                                 <i class="linearicons-bag2"></i>
 
@@ -257,16 +257,23 @@
                                     <select name="warehouse" id="warehouse"
                                             size="5" style="width: 100%"
                                             class="px-3 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="">Skip Selection</option>
+                                        {{--                                        <option value="">Skip Selection</option>--}}
                                         @if(session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire))
 
-                                                @foreach($warehouse_lists as $item)
-                                                    <option value="{{$item['id']}}!{{$item['name']}}" @if($item['id'] == $warehouse_id) selected @endif>
-                                                        {{$item['name']}}
-                                                    </option>
-                                                @endforeach
+                                            @foreach($warehouse_lists as $item)
+                                                <option value="{{$item['id']}}!{{$item['name']}}" @if($item['id'] == $warehouse_id) selected @endif>
+                                                    {{$item['name']}}
+                                                </option>
+                                            @endforeach
                                         @endif
                                     </select>
+                                    @error('warehouse')
+                                    <small class="text-danger">{{$message}}</small>
+                                    @enderror
+
+                                    @error('warehouse_data')
+                                    <small class="text-danger">{{$message}}</small>
+                                    @enderror
 
 
                                 </div>
@@ -282,7 +289,7 @@
     </div>
 </div>
 
-@if(session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire) && !\Illuminate\Support\Facades\Cache::has('warehouse') && !\Illuminate\Support\Facades\Cache::has('warehouse_skip'))
+@if(session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire) && !\Illuminate\Support\Facades\Cache::has('warehouse'))
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             // Bootstrap 5 way to open modal

@@ -101,12 +101,12 @@
                                                                                 </tr>
                                                                                 @if(session()->has('second_layer_token') && $tokenExpire && now()->lessThan($tokenExpire))
                                                                                     @if(isset($item['warehouse_stock_qty']))
-                                                                                    @foreach($item['warehouse_stock_qty'] as $warehouse_qty)
-                                                                                        <tr>
-                                                                                            <td>{{$warehouse_qty['warehouse_name']}}</td>
-                                                                                            <td>{{$warehouse_qty['qty']}}</td>
-                                                                                        </tr>
-                                                                                    @endforeach
+                                                                                        @foreach($item['warehouse_stock_qty'] as $warehouse_qty)
+                                                                                            <tr>
+                                                                                                <td>{{$warehouse_qty['warehouse_name']}}</td>
+                                                                                                <td>{{$warehouse_qty['qty']}}</td>
+                                                                                            </tr>
+                                                                                        @endforeach
                                                                                     @endif
                                                                                 @endif
                                                                             </table>
@@ -134,13 +134,15 @@
                                                                                                 @if(isset($item['warehouse_stock_qty']))
                                                                                                     @php($selected_warehouse = \Illuminate\Support\Facades\Cache::get('warehouse'))
 
-                                                                                                @foreach($item['warehouse_stock_qty'] as $warehouse)
+                                                                                                    @foreach($item['warehouse_stock_qty'] as $warehouse)
                                                                                                         <option value="{{$warehouse['warehouse_id']}}!{{$warehouse['batch_id']}}" @if($warehouse['warehouse_id'] == $selected_warehouse) selected @endif>{{$warehouse['warehouse_name']}}</option>
                                                                                                     @endforeach
                                                                                                 @endif
                                                                                             @endif
-
                                                                                         </select>
+                                                                                        @error('warehouse_data')
+                                                                                        <small class="text-danger">{{$message}}</small>
+                                                                                        @enderror
                                                                                     </div>
                                                                                 </div>
                                                                                 <div class="form-group mb-3">
