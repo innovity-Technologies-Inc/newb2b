@@ -153,6 +153,11 @@ class ErpController extends Controller
 
     public function add_to_cart(Request $request)
     {
+        $request->validate([
+            'warehouse_data' => 'required',
+        ], [
+            'warehouse_data' => 'Please select a warehouse',
+        ]);
 
         $data = $this->erp->addToCart($request);
 
@@ -429,7 +434,7 @@ class ErpController extends Controller
                 'customer_name.regex' => 'Your Name can only contain letters',
                 'password.regex' => 'Please enter at least one special character',
                 'mobile.required' => 'Please enter your mobile number',
-                'mobile.regex' => 'Please enter a valid USA mobile number with country code and area code without this (+) symbol',
+                'mobile.regex' => 'Please enter a valid USA mobile number with country code and area code without + symbol',
                 'email.required' => 'Please enter your email address',
                 'password.min' => 'Please enter at least 8 characters',
                 'mobile.digits_between' => 'Please enter only digits between 3 and 17 characters',
@@ -440,6 +445,7 @@ class ErpController extends Controller
                 'email' => 'Email Address',
                 'password' => 'Password',
             ]);
+
         $data = $this->erp->customer_insert($request);
         if (isset($data['status']) && $data['status'] === 'error') {
             return redirect()->back()->with([
@@ -560,6 +566,11 @@ class ErpController extends Controller
 
     public function warehouse_store(Request $request)
     {
+        $request->validate([
+            'warehouse' => 'required',
+        ], [
+            'warehouse' => 'Please select a warehouse',
+        ]);
         $warehouse_data = $request->warehouse;
         if (isset($warehouse_data)) {
 //            dd('data_set');
