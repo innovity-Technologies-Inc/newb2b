@@ -387,6 +387,7 @@ class ErpController extends Controller
             // dd($second_layer_token);
             session()->put('second_layer_token', $second_layer_token);
             session()->put('second_layer_token_expire_at', now()->addMinutes(50));
+            session()->put('modal', true);
 
             $this->erp->getProfile();
             return redirect()->route('user.dashboard')->with([

@@ -18,10 +18,10 @@
                                     </div>
                                     <div class="card-body">
                                         @php
-                                        $name = session()->get('customer_name')
+                                            $name = session()->get('customer_name')
                                         @endphp
                                         <p>Welcome <span style="color: #2e307c; font-weight: bold">Mr. {{$name}}</span> to Deshishad.
-                                        Now you can manage your profile, check you purchase history, track order from here.</p>
+                                            Now you can manage your profile, check you purchase history, track order from here.</p>
                                     </div>
                                 </div>
                                 <div class="row my-3">
@@ -96,4 +96,20 @@
         </div>
         <!-- END SECTION SHOP -->
     </div>
+
+    @if(session()->has('modal'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                // Bootstrap 5 way to open modal
+                var warehouseModal = new bootstrap.Modal(document.getElementById('warehouse_selection'));
+                warehouseModal.show();
+            });
+        </script>
+    @endif
+
+    @php
+        session()->forget('modal');
+    @endphp
+
 @endsection
+
